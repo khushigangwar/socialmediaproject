@@ -39,7 +39,7 @@ namespace socialmediaproject.Controllers
         {
             if(registration == null)
             {
-                return BadRequest("Registration Object is Null");
+                return BadRequest("Post Object is Null");
             }
             var createdUser = await this._registrationRepo.AddUser(registration);
 

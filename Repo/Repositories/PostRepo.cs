@@ -3,6 +3,7 @@ using socialmediaproject.Models;
 using socialmediaproject.Models.Data;
 using socialmediaproject.Repo.Interfaces;
 using System.Data;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace socialmediaproject.Repo.Repositories
 {
@@ -13,21 +14,21 @@ namespace socialmediaproject.Repo.Repositories
         {
             this.context = context;
         }
-        async Task<string> IPostRepo.Create(Post post)
+        public async Task<string> Create(Post post)
         {
-            string response =string.Empty;
-            var query = "INSERT INTO Posts (PostId, Content, CreatedAt) VALUES (@UserId, @Content, @CreatedAt)";
-            var parameters = new DynamicParameters();
-            parameters.Add("Content", post.Content, DbType.String);
-            using (var connection = this.context.CreateConnection())
+            var query = @"
+            INSERT INTO Images (UserId, ImageName, ContentType, Content, CreatedDate)
+            VALUES (@UserId, @ImageName, @ContentType, @Content, @CreatedDate);
+            SELECT CAST(SCOPE_IDENTITY() as int);";
+
+            using (var connection = context.CreateConnection())
             {
-                await connection.ExecuteAsync(query, parameters);
+                var imageId = await connection.QuerySingleAsync(query, post);
+                return imageId;
             }
-            response = "Post created successfully"; // Added response message
-            return response;
         }
 
-        async Task<IEnumerable<Post>> IPostRepo.Getpost(int id)
+        public async Task<IEnumerable<Post>>Getpost(int id)
         {
             var query = "Select * from Post where UserId=@UserId";
             using var connectin = this.context.CreateConnection();
@@ -35,7 +36,7 @@ namespace socialmediaproject.Repo.Repositories
             return user.ToList();
         }
 
-        async Task<Post> IPostRepo.GetpostById(int id)
+        public async Task<Post> GetpostById(int id)
         {
             var query = "Select * from Post where UserId=@UserId";
             using var connectin=this.context.CreateConnection();
