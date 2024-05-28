@@ -5,7 +5,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace socialmediaproject.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/")]
     [ApiController]
     public class PostController : Controller
     {
@@ -18,34 +18,16 @@ namespace socialmediaproject.Controllers
         [HttpGet("getbyId/{id}")]
         public async Task<IActionResult> GetPost(int userId)
         {
-            var post=await _postRepo.GetpostById(userId);
+            var post = await _postRepo.GetpostById(userId);
             return Ok(post);
         }
         [HttpPost("upload")]
-        public async  Task<IActionResult>Create([FromForm] IFormFile file, [FromForm] int userId)
- 
-     {
-        if (file == null || file.Length == 0)
+        public async Task<IActionResult> Create(Post post)
+
         {
-            return BadRequest("No file uploaded.");
+             string result = await _postRepo.Create(post);
+
+            return Ok(result);
         }
-
-using (var memoryStream = new MemoryStream())
-{
-    await file.CopyToAsync(memoryStream);
-    var image = new Post
-    {
-        UserId = userId,
-        ImageName = file.FileName,
-        ContentType = file.ContentType,
-        Content = memoryStream.ToArray(),
-        CreatedDate = DateTime.UtcNow
-    };
-
-    var imageId = await _postRepo.Create(image);
-    return Ok(new { ImageId = imageId });
-}
-    }
-
     }
 }

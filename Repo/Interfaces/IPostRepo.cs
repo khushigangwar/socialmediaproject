@@ -7,7 +7,7 @@ namespace socialmediaproject.Repo.Interfaces
         //get image by postid
        Task<Post> GetpostById(int id);
         //get image by userId
-        Task<IEnumerable<Post>> Getpost(int UserId);
+        Task<IEnumerable<Post>> Getpost(int Id);
         Task<string> Create(Post post);
 
     }

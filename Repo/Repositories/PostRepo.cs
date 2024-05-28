@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.Data.SqlClient;
 using socialmediaproject.Models;
 using socialmediaproject.Models.Data;
 using socialmediaproject.Repo.Interfaces;
@@ -10,37 +11,42 @@ namespace socialmediaproject.Repo.Repositories
     public class PostRepo : IPostRepo
     {
         private readonly DataDbContext context;
-        private PostRepo(DataDbContext context)
+        public PostRepo(DataDbContext context)
         {
             this.context = context;
         }
+
+
         public async Task<string> Create(Post post)
         {
-            var query = @"
-            INSERT INTO Images (UserId, ImageName, ContentType, Content, CreatedDate)
-            VALUES (@UserId, @ImageName, @ContentType, @Content, @CreatedDate);
-            SELECT CAST(SCOPE_IDENTITY() as int);";
-
-            using (var connection = context.CreateConnection())
+            //using IDbConnection db = new SqlConnection("context");
+            string query = "INSERT INTO Post (Id,ImageName, Content) VALUES (@Id,@ImageName, @Content)";
+            using var connectin = this.context.CreateConnection();
+            // int rowsAffected = await db.ExecuteAsync(query, new { ImageName = post.ImageName, Content = post.Content });
+            var posts = await connectin.ExecuteAsync(query, new {Id=post.Id, ImageName = post.ImageName, Content = post.Content });
+            if (posts > 0)
             {
-                var imageId = await connection.QuerySingleAsync(query, post);
-                return imageId;
+                return "Image uploaded successfully!";
+            }
+            else
+            {
+                return "Image upload failed.";
             }
         }
 
         public async Task<IEnumerable<Post>>Getpost(int id)
         {
-            var query = "Select * from Post where UserId=@UserId";
+            var query = "Select * from Post where Id=@Id";
             using var connectin = this.context.CreateConnection();
-            var user = await connectin.QueryAsync<Post>(query, new { userId = id });
+            var user = await connectin.QueryAsync<Post>(query, new { Id = id });
             return user.ToList();
         }
 
         public async Task<Post> GetpostById(int id)
         {
-            var query = "Select * from Post where UserId=@UserId";
+            var query = "Select * from Post where Id=@Id";
             using var connectin=this.context.CreateConnection();
-            var user=await connectin.QuerySingleOrDefaultAsync<Post>(query, new {UserId=id});
+            var user=await connectin.QuerySingleOrDefaultAsync<Post>(query, new {Id=id});
             return user;
         }
         
